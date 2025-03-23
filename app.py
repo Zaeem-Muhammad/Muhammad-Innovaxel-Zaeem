@@ -76,6 +76,19 @@ def update_short_url(short_code):
     return jsonify({"message": "URL updated successfully"}), 200
 
 
+@app.route("/shorten/<string:short_code>", methods=["DELETE"])
+def delete_short_url(short_code):
+    conn = create_db_connection()
+    cursor = conn.cursor()
+    delete_query = "DELETE FROM urls WHERE short_code = %s"
+    cursor.execute(delete_query, (short_code,))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+    return jsonify({"message": "Short URL deleted"}), 204
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
