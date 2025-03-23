@@ -42,5 +42,22 @@ def create_short_url():
     return jsonify({"short_code": short_code, "url": data["url"]}), 201
 
 
+@app.route("/shorten/<string:short_code>", methods=["GET"])
+def get_original_url(short_code):
+    conn = create_db_connection()
+    cursor = conn.cursor()
+    query = "SELECT original_url FROM urls WHERE short_code = %s"
+    cursor.execute(query, (short_code,))
+    row = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if row:
+        return jsonify({"url": row[0]}), 200
+    return jsonify({"error": "Short code not found"}), 404
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)
