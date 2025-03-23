@@ -58,6 +58,24 @@ def get_original_url(short_code):
     return jsonify({"error": "Short code not found"}), 404
 
 
+@app.route("/shorten/<string:short_code>", methods=["PUT"])
+def update_short_url(short_code):
+    data = request.get_json()
+    if not data or "url" not in data:
+        return jsonify({"error": "New URL is required"}), 400
+
+    conn = create_db_connection()
+    cursor = conn.cursor()
+    update_query = "UPDATE urls SET original_url = %s WHERE short_code = %s"
+    cursor.execute(update_query, (data["url"], short_code))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({"message": "URL updated successfully"}), 200
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
