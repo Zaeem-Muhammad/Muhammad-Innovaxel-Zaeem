@@ -1,4 +1,5 @@
 from flask import Flask
+from flask import request, jsonify
 import mysql.connector
 import random
 import string
@@ -20,6 +21,26 @@ def create_db_connection():
 @app.route("/")
 def home():
     return "URL Shortener API is running!"
+
+
+@app.route("/shorten", methods=["POST"])
+def create_short_url():
+    data = request.get_json()
+    if not data or "url" not in data:
+        return jsonify({"error": "URL is required"}), 400
+
+    short_code = generate_short_code()
+    conn = create_db_connection()
+    cursor = conn.cursor()
+
+    insert_query = "INSERT INTO urls (original_url, short_code) VALUES (%s, %s)"
+    cursor.execute(insert_query, (data["url"], short_code))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+    return jsonify({"short_code": short_code, "url": data["url"]}), 201
+
 
 if __name__ == "__main__":
     app.run(debug=True)
