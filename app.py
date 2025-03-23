@@ -1,8 +1,13 @@
 from flask import Flask
 import mysql.connector
+import random
+import string
 
 app = Flask(__name__)
 
+
+def generate_short_code(length=7):
+    return "".join(random.choices(string.ascii_letters + string.digits, k=length))
 
 def create_db_connection():
     return mysql.connector.connect(
