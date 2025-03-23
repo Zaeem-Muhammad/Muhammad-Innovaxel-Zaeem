@@ -89,6 +89,22 @@ def delete_short_url(short_code):
     return jsonify({"message": "Short URL deleted"}), 204
 
 
+@app.route("/shorten/<string:short_code>/stats", methods=["GET"])
+def get_short_url_stats(short_code):
+    conn = create_db_connection()
+    cursor = conn.cursor()
+    query = "SELECT original_url, access_count FROM urls WHERE short_code = %s"
+    cursor.execute(query, (short_code,))
+    row = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if row:
+        return jsonify({"url": row[0], "access_count": row[1]}), 200
+    return jsonify({"error": "Short code not found"}), 404
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
